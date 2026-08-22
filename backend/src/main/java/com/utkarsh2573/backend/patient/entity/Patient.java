@@ -32,10 +32,10 @@ public class Patient {
     @Column(nullable = false, length = 20)
     private String gender;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, unique = true, length = 15)
     private String phone;
 
-    @Column(length = 120)
+    @Column(length = 120, unique = true)
     private String email;
 
     @Column(length = 500)

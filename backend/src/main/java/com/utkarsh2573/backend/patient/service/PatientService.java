@@ -1,5 +1,6 @@
 package com.utkarsh2573.backend.patient.service;
 
+import com.utkarsh2573.backend.exception.BadRequestException;
 import com.utkarsh2573.backend.exception.ResourceNotFoundException;
 import com.utkarsh2573.backend.patient.dto.*;
 import com.utkarsh2573.backend.patient.entity.Patient;
@@ -19,6 +20,21 @@ public class PatientService {
 
     @Transactional
     public PatientResponse create(CreatePatientRequest request) {
+        if (patientRepository.existsByPhone(request.phone())) {
+            throw new BadRequestException(
+                    "Patient with phone number " + request.phone() + " already exists"
+            );
+        }
+
+        if (request.email() != null
+                && !request.email().isBlank()
+                && patientRepository.existsByEmail(request.email())) {
+
+            throw new BadRequestException(
+                    "Patient with email " + request.email() + " already exists"
+            );
+        }
+        
         Patient patient = Patient.builder()
                 .patientNumber(generatePatientNumber())
                 .fullName(request.fullName())
@@ -62,4 +78,6 @@ public class PatientService {
         } while (patientRepository.existsByPatientNumber(number));
         return number;
     }
+
+
 }
