@@ -6,6 +6,8 @@ import com.utkarsh2573.backend.patient.dto.PatientPrescriptionResponse;
 import com.utkarsh2573.backend.patient.dto.PatientVisitSummary;
 import com.utkarsh2573.backend.patient.entity.Patient;
 import com.utkarsh2573.backend.patient.repository.PatientRepository;
+import com.utkarsh2573.backend.pharmacy.dto.PharmacyDispenseResponse;
+import com.utkarsh2573.backend.pharmacy.repository.PharmacyDispenseRepository;
 import com.utkarsh2573.backend.prescription.repository.PrescriptionRepository;
 import com.utkarsh2573.backend.visit.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class PatientPortalService {
     private final PatientRepository patientRepository;
     private final VisitRepository visitRepository;
     private final PrescriptionRepository prescriptionRepository;
+    private final PharmacyDispenseRepository pharmacyDispenseRepository;
 
     private Patient getLoggedInPatient(String username) {
 
@@ -90,6 +93,20 @@ public class PatientPortalService {
                 )
                 .stream()
                 .map(PatientPrescriptionResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PharmacyDispenseResponse> getPharmacyHistory(
+            String username
+    ) {
+
+        Patient patient = getLoggedInPatient(username);
+
+        return pharmacyDispenseRepository
+                .findByPatientIdOrderByIdDesc(patient.getId())
+                .stream()
+                .map(PharmacyDispenseResponse::from)
                 .toList();
     }
 }

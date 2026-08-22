@@ -4,6 +4,7 @@ import com.utkarsh2573.backend.patient.dto.PatientDashboardResponse;
 import com.utkarsh2573.backend.patient.dto.PatientPrescriptionResponse;
 import com.utkarsh2573.backend.patient.dto.PatientVisitSummary;
 import com.utkarsh2573.backend.patient.service.PatientPortalService;
+import com.utkarsh2573.backend.pharmacy.dto.PharmacyDispenseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -36,6 +37,16 @@ public class PatientPortalController {
             Authentication authentication
     ) {
         return patientPortalService.getPrescriptions(
+                authentication.getName()
+        );
+    }
+
+    @GetMapping("/pharmacy")
+    @PreAuthorize("hasRole('PATIENT')")
+    public List<PharmacyDispenseResponse> pharmacy(
+            Authentication authentication
+    ) {
+        return patientPortalService.getPharmacyHistory(
                 authentication.getName()
         );
     }
