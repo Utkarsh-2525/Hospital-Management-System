@@ -18,9 +18,12 @@ public class PatientController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','RECEPTIONIST')")
-    public ResponseEntity<PatientResponse> create(
-            @Valid @RequestBody CreatePatientRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(patientService.create(request));
+    public ResponseEntity<PatientCreationResponse> create(
+            @Valid @RequestBody CreatePatientRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(patientService.create(request));
     }
 
     @GetMapping("/{id}")
@@ -34,7 +37,8 @@ public class PatientController {
     public Page<PatientResponse> search(
             @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size
+    ) {
         return patientService.search(query, page, size);
     }
 }
