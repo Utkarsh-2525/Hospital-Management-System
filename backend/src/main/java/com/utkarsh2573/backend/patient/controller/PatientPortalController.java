@@ -1,6 +1,9 @@
 package com.utkarsh2573.backend.patient.controller;
 
+import com.utkarsh2573.backend.laboratory.dto.LabOrderResponse;
+import com.utkarsh2573.backend.laboratory.dto.LabResultResponse;
 import com.utkarsh2573.backend.patient.dto.PatientDashboardResponse;
+import com.utkarsh2573.backend.patient.dto.PatientMedicalRecordResponse;
 import com.utkarsh2573.backend.patient.dto.PatientPrescriptionResponse;
 import com.utkarsh2573.backend.patient.dto.PatientVisitSummary;
 import com.utkarsh2573.backend.patient.service.PatientPortalService;
@@ -47,6 +50,38 @@ public class PatientPortalController {
             Authentication authentication
     ) {
         return patientPortalService.getPharmacyHistory(
+                authentication.getName()
+        );
+    }
+
+    @GetMapping("/lab-orders")
+    @PreAuthorize("hasRole('PATIENT')")
+    public List<LabOrderResponse> labOrders(
+            Authentication authentication
+    ) {
+        return patientPortalService.getLabOrders(
+                authentication.getName()
+        );
+    }
+
+    @GetMapping("/lab-orders/{orderId}/result")
+    @PreAuthorize("hasRole('PATIENT')")
+    public LabResultResponse labResult(
+            @PathVariable Long orderId,
+            Authentication authentication
+    ) {
+        return patientPortalService.getLabResult(
+                authentication.getName(),
+                orderId
+        );
+    }
+
+    @GetMapping("/medical-record")
+    @PreAuthorize("hasRole('PATIENT')")
+    public PatientMedicalRecordResponse medicalRecord(
+            Authentication authentication
+    ) {
+        return patientPortalService.getMedicalRecord(
                 authentication.getName()
         );
     }

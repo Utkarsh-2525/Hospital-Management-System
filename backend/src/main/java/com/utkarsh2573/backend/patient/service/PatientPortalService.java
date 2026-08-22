@@ -1,7 +1,13 @@
 package com.utkarsh2573.backend.patient.service;
 
 import com.utkarsh2573.backend.exception.ResourceNotFoundException;
+import com.utkarsh2573.backend.laboratory.dto.LabOrderResponse;
+import com.utkarsh2573.backend.laboratory.dto.LabResultResponse;
+import com.utkarsh2573.backend.laboratory.entity.LabOrder;
+import com.utkarsh2573.backend.laboratory.repository.LabOrderRepository;
+import com.utkarsh2573.backend.laboratory.repository.LabResultRepository;
 import com.utkarsh2573.backend.patient.dto.PatientDashboardResponse;
+import com.utkarsh2573.backend.patient.dto.PatientMedicalRecordResponse;
 import com.utkarsh2573.backend.patient.dto.PatientPrescriptionResponse;
 import com.utkarsh2573.backend.patient.dto.PatientVisitSummary;
 import com.utkarsh2573.backend.patient.entity.Patient;
@@ -24,6 +30,8 @@ public class PatientPortalService {
     private final VisitRepository visitRepository;
     private final PrescriptionRepository prescriptionRepository;
     private final PharmacyDispenseRepository pharmacyDispenseRepository;
+    private final LabOrderRepository labOrderRepository;
+    private final LabResultRepository labResultRepository;
 
     private Patient getLoggedInPatient(String username) {
 
@@ -108,5 +116,113 @@ public class PatientPortalService {
                 .stream()
                 .map(PharmacyDispenseResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<LabOrderResponse> getLabOrders(String username) {
+
+        Patient patient = getLoggedInPatient(username);
+
+        return labOrderRepository
+                .findByPatientIdOrderByOrderedAtDesc(patient.getId())
+                .stream()
+                .map(LabOrderResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public LabResultResponse getLabResult(
+            String username,
+            Long orderId
+    ) {
+
+        Patient patient = getLoggedInPatient(username);
+
+        LabOrder order = labOrderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Lab order not found: " + orderId
+                        )
+                );
+
+        /*
+         * Security check:
+         * the requested lab order must belong to
+         * the authenticated patient.
+         */
+        if (!order.getPatient().getId().equals(patient.getId())) {
+
+            throw new ResourceNotFoundException(
+                    "Lab order not found: " + orderId
+            );
+        }
+
+        return labResultRepository
+                .findByLabOrderId(orderId)
+                .map(LabResultResponse::from)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Lab result not found for order: "
+                                        + orderId
+                        )
+                );
+    }
+
+    @Transactional(readOnly = true)
+    public PatientMedicalRecordResponse getMedicalRecord(
+            String username
+    ) {
+
+        Patient patient = getLoggedInPatient(username);
+
+        List<PatientVisitSummary> visits =
+                visitRepository
+                        .findByPatientIdOrderByVisitDateDescCreatedAtDesc(
+                                patient.getId()
+                        )
+                        .stream()
+                        .map(PatientVisitSummary::from)
+                        .toList();
+
+        List<PatientPrescriptionResponse> prescriptions =
+                prescriptionRepository
+                        .findByPatientIdOrderByPrescribedAtDesc(
+                                patient.getId()
+                        )
+                        .stream()
+                        .map(PatientPrescriptionResponse::from)
+                        .toList();
+
+        List<PharmacyDispenseResponse> pharmacy =
+                pharmacyDispenseRepository
+                        .findByPatientIdOrderByIdDesc(
+                                patient.getId()
+                        )
+                        .stream()
+                        .map(PharmacyDispenseResponse::from)
+                        .toList();
+
+        List<LabOrderResponse> labOrders =
+                labOrderRepository
+                        .findByPatientIdOrderByOrderedAtDesc(
+                                patient.getId()
+                        )
+                        .stream()
+                        .map(LabOrderResponse::from)
+                        .toList();
+
+        return new PatientMedicalRecordResponse(
+
+                new PatientMedicalRecordResponse.PatientSummary(
+                        patient.getPatientNumber(),
+                        patient.getFullName(),
+                        patient.getBloodGroup()
+                ),
+
+                visits,
+                prescriptions,
+                pharmacy,
+                labOrders
+        );
     }
 }

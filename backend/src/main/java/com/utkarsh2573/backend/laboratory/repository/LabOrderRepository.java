@@ -15,9 +15,9 @@ public interface LabOrderRepository
             Long patientId
     );
 
-    List<LabOrder> findByConsultationIdOrderByOrderedAtDesc(
-            Long consultationId
-    );
+//    List<LabOrder> findByConsultationIdOrderByOrderedAtDesc(
+//            Long consultationId
+//    );
 
     boolean existsByOrderNumber(String orderNumber);
 }
