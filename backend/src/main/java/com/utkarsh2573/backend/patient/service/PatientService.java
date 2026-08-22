@@ -34,7 +34,7 @@ public class PatientService {
                     "Patient with email " + request.email() + " already exists"
             );
         }
-        
+
         Patient patient = Patient.builder()
                 .patientNumber(generatePatientNumber())
                 .fullName(request.fullName())
