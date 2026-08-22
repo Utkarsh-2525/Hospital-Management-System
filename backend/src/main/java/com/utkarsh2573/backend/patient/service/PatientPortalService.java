@@ -2,9 +2,11 @@ package com.utkarsh2573.backend.patient.service;
 
 import com.utkarsh2573.backend.exception.ResourceNotFoundException;
 import com.utkarsh2573.backend.patient.dto.PatientDashboardResponse;
+import com.utkarsh2573.backend.patient.dto.PatientPrescriptionResponse;
 import com.utkarsh2573.backend.patient.dto.PatientVisitSummary;
 import com.utkarsh2573.backend.patient.entity.Patient;
 import com.utkarsh2573.backend.patient.repository.PatientRepository;
+import com.utkarsh2573.backend.prescription.repository.PrescriptionRepository;
 import com.utkarsh2573.backend.visit.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,36 +20,76 @@ public class PatientPortalService {
 
     private final PatientRepository patientRepository;
     private final VisitRepository visitRepository;
+    private final PrescriptionRepository prescriptionRepository;
 
-    @Transactional(readOnly = true)
-    public PatientDashboardResponse getDashboard(String username) {
-        Patient patient = patientRepository.findByUserUsername(username)
+    private Patient getLoggedInPatient(String username) {
+
+        return patientRepository.findByUserUsername(username)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Patient profile not found for logged-in user"
-                        ));
+                        )
+                );
+    }
+
+    // =========================================================
+    // 7A - DASHBOARD
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public PatientDashboardResponse getDashboard(String username) {
+
+        Patient patient = getLoggedInPatient(username);
 
         List<PatientVisitSummary> visits = visitRepository
-                .findByPatientIdOrderByVisitDateDescCreatedAtDesc(patient.getId())
+                .findByPatientIdOrderByVisitDateDescCreatedAtDesc(
+                        patient.getId()
+                )
                 .stream()
                 .map(PatientVisitSummary::from)
                 .toList();
 
-        return PatientDashboardResponse.from(patient, visits);
+        return PatientDashboardResponse.from(
+                patient,
+                visits
+        );
     }
+
+    // =========================================================
+    // 7A - VISITS
+    // =========================================================
 
     @Transactional(readOnly = true)
     public List<PatientVisitSummary> getVisits(String username) {
-        Patient patient = patientRepository.findByUserUsername(username)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Patient profile not found for logged-in user"
-                        ));
+
+        Patient patient = getLoggedInPatient(username);
 
         return visitRepository
-                .findByPatientIdOrderByVisitDateDescCreatedAtDesc(patient.getId())
+                .findByPatientIdOrderByVisitDateDescCreatedAtDesc(
+                        patient.getId()
+                )
                 .stream()
                 .map(PatientVisitSummary::from)
+                .toList();
+    }
+
+    // =========================================================
+    // 7B - PRESCRIPTIONS
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public List<PatientPrescriptionResponse> getPrescriptions(
+            String username
+    ) {
+
+        Patient patient = getLoggedInPatient(username);
+
+        return prescriptionRepository
+                .findByPatientIdOrderByPrescribedAtDesc(
+                        patient.getId()
+                )
+                .stream()
+                .map(PatientPrescriptionResponse::from)
                 .toList();
     }
 }

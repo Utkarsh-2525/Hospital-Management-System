@@ -1,6 +1,7 @@
 package com.utkarsh2573.backend.patient.controller;
 
 import com.utkarsh2573.backend.patient.dto.PatientDashboardResponse;
+import com.utkarsh2573.backend.patient.dto.PatientPrescriptionResponse;
 import com.utkarsh2573.backend.patient.dto.PatientVisitSummary;
 import com.utkarsh2573.backend.patient.service.PatientPortalService;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +28,15 @@ public class PatientPortalController {
     @PreAuthorize("hasRole('PATIENT')")
     public List<PatientVisitSummary> visits(Authentication authentication) {
         return patientPortalService.getVisits(authentication.getName());
+    }
+
+    @GetMapping("/prescriptions")
+    @PreAuthorize("hasRole('PATIENT')")
+    public List<PatientPrescriptionResponse> prescriptions(
+            Authentication authentication
+    ) {
+        return patientPortalService.getPrescriptions(
+                authentication.getName()
+        );
     }
 }
