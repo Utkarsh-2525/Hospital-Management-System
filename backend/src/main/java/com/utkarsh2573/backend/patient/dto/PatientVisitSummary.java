@@ -7,17 +7,25 @@ public record PatientVisitSummary(
         String visitNumber,
         Long doctorId,
         String doctorName,
+        Long departmentId,
         String departmentName,
-        String status
+        String visitDate,
+        String status,
+        String reason,
+        String consultationFee
 ) {
-    public static PatientVisitSummary from(Visit v) {
+    public static PatientVisitSummary from(Visit visit) {
         return new PatientVisitSummary(
-                v.getId(),
-                v.getVisitNumber(),
-                v.getDoctor().getId(),
-                v.getDoctor().getFullName(),
-                v.getDoctor().getDepartment().getName(),
-                v.getStatus().name()
+                visit.getId(),
+                visit.getVisitNumber(),
+                visit.getDoctor().getId(),
+                visit.getDoctor().getFullName(),
+                visit.getDepartment().getId(),
+                visit.getDepartment().getName(),
+                visit.getVisitDate().toString(),
+                visit.getStatus().name(),
+                visit.getReason(),
+                visit.getConsultationFee().toString()
         );
     }
 }

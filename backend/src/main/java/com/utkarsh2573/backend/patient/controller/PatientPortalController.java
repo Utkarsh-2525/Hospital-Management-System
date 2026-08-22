@@ -1,6 +1,7 @@
 package com.utkarsh2573.backend.patient.controller;
 
-import com.utkarsh2573.backend.patient.dto.*;
+import com.utkarsh2573.backend.patient.dto.PatientDashboardResponse;
+import com.utkarsh2573.backend.patient.dto.PatientVisitSummary;
 import com.utkarsh2573.backend.patient.service.PatientPortalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,12 +20,12 @@ public class PatientPortalController {
     @GetMapping("/dashboard")
     @PreAuthorize("hasRole('PATIENT')")
     public PatientDashboardResponse dashboard(Authentication authentication) {
-        return patientPortalService.dashboard(authentication.getName());
+        return patientPortalService.getDashboard(authentication.getName());
     }
 
     @GetMapping("/visits")
     @PreAuthorize("hasRole('PATIENT')")
     public List<PatientVisitSummary> visits(Authentication authentication) {
-        return patientPortalService.visits(authentication.getName());
+        return patientPortalService.getVisits(authentication.getName());
     }
 }

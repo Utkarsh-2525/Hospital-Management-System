@@ -1,6 +1,7 @@
 package com.utkarsh2573.backend.doctor.service;
 
-import com.utkarsh2573.backend.doctor.dto.*;
+import com.utkarsh2573.backend.doctor.dto.DoctorScheduleRequest;
+import com.utkarsh2573.backend.doctor.dto.DoctorScheduleResponse;
 import com.utkarsh2573.backend.doctor.entity.Doctor;
 import com.utkarsh2573.backend.doctor.entity.DoctorSchedule;
 import com.utkarsh2573.backend.doctor.repository.DoctorRepository;
@@ -21,20 +22,20 @@ public class DoctorScheduleService {
     private final DoctorScheduleRepository scheduleRepository;
 
     @Transactional
-    public DoctorScheduleResponse createOrUpdate(Long doctorId, DoctorScheduleRequest request) {
+    public DoctorScheduleResponse createOrUpdate(
+            Long doctorId,
+            DoctorScheduleRequest request
+    ) {
         if (!request.endTime().isAfter(request.startTime())) {
             throw new BadRequestException("End time must be after start time");
         }
 
         Doctor doctor = doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Doctor not found: " + doctorId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Doctor not found: " + doctorId));
 
         DoctorSchedule schedule = scheduleRepository
-                .findByDoctorIdAndDayOfWeekAndAvailableTrue(
-                        doctorId, request.dayOfWeek())
-                .stream()
-                .findFirst()
+                .findByDoctorIdAndDayOfWeek(doctorId, request.dayOfWeek())
                 .orElseGet(() -> DoctorSchedule.builder()
                         .doctor(doctor)
                         .dayOfWeek(request.dayOfWeek())
@@ -44,7 +45,9 @@ public class DoctorScheduleService {
         schedule.setEndTime(request.endTime());
         schedule.setAvailable(request.available());
 
-        return DoctorScheduleResponse.from(scheduleRepository.save(schedule));
+        return DoctorScheduleResponse.from(
+                scheduleRepository.save(schedule)
+        );
     }
 
     @Transactional(readOnly = true)
@@ -54,7 +57,7 @@ public class DoctorScheduleService {
         }
 
         return scheduleRepository
-                .findByDoctorIdAndAvailableTrueOrderByDayOfWeekAscStartTimeAsc(doctorId)
+                .findByDoctorIdOrderByDayOfWeekAscStartTimeAsc(doctorId)
                 .stream()
                 .map(DoctorScheduleResponse::from)
                 .toList();

@@ -5,11 +5,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.DayOfWeek;
 import java.util.List;
+import java.util.Optional;
 
 public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, Long> {
 
-    List<DoctorSchedule> findByDoctorIdAndAvailableTrueOrderByDayOfWeekAscStartTimeAsc(Long doctorId);
+    Optional<DoctorSchedule> findByDoctorIdAndDayOfWeek(
+            Long doctorId,
+            DayOfWeek dayOfWeek
+    );
 
-    List<DoctorSchedule> findByDoctorIdAndDayOfWeekAndAvailableTrue(
-            Long doctorId, DayOfWeek dayOfWeek);
+    List<DoctorSchedule> findByDoctorIdOrderByDayOfWeekAscStartTimeAsc(Long doctorId);
+
+    List<DoctorSchedule> findByDoctorIdAndAvailableTrueOrderByDayOfWeekAscStartTimeAsc(
+            Long doctorId
+    );
 }

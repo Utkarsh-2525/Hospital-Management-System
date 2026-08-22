@@ -8,11 +8,11 @@ import java.time.LocalTime;
 
 @Entity
 @Table(
-    name = "doctor_schedules",
-    uniqueConstraints = @UniqueConstraint(
-        name = "uk_doctor_day",
-        columnNames = {"doctor_id", "day_of_week"}
-    )
+        name = "doctor_schedules",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_doctor_schedule_day",
+                columnNames = {"doctor_id", "day_of_week"}
+        )
 )
 @Getter
 @Setter

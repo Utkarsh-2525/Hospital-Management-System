@@ -1,10 +1,10 @@
 package com.utkarsh2573.backend.patient.service;
 
 import com.utkarsh2573.backend.exception.ResourceNotFoundException;
-import com.utkarsh2573.backend.patient.dto.*;
+import com.utkarsh2573.backend.patient.dto.PatientDashboardResponse;
+import com.utkarsh2573.backend.patient.dto.PatientVisitSummary;
 import com.utkarsh2573.backend.patient.entity.Patient;
 import com.utkarsh2573.backend.patient.repository.PatientRepository;
-import com.utkarsh2573.backend.visit.entity.Visit;
 import com.utkarsh2573.backend.visit.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,13 +20,15 @@ public class PatientPortalService {
     private final VisitRepository visitRepository;
 
     @Transactional(readOnly = true)
-    public PatientDashboardResponse dashboard(String username) {
+    public PatientDashboardResponse getDashboard(String username) {
         Patient patient = patientRepository.findByUserUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Patient profile not found for user: " + username));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Patient profile not found for logged-in user"
+                        ));
 
         List<PatientVisitSummary> visits = visitRepository
-                .findByPatientIdOrderByIdDesc(patient.getId())
+                .findByPatientIdOrderByVisitDateDescCreatedAtDesc(patient.getId())
                 .stream()
                 .map(PatientVisitSummary::from)
                 .toList();
@@ -35,12 +37,15 @@ public class PatientPortalService {
     }
 
     @Transactional(readOnly = true)
-    public List<PatientVisitSummary> visits(String username) {
+    public List<PatientVisitSummary> getVisits(String username) {
         Patient patient = patientRepository.findByUserUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Patient profile not found for user: " + username));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Patient profile not found for logged-in user"
+                        ));
 
-        return visitRepository.findByPatientIdOrderByIdDesc(patient.getId())
+        return visitRepository
+                .findByPatientIdOrderByVisitDateDescCreatedAtDesc(patient.getId())
                 .stream()
                 .map(PatientVisitSummary::from)
                 .toList();
