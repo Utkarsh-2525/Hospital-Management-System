@@ -12,17 +12,32 @@ public record InvoiceResponse(
         String visitNumber,
         String patientNumber,
         String patientName,
+        BigDecimal consultationFee,
+        BigDecimal registrationFee,
         BigDecimal amount,
         BigDecimal paidAmount,
+        BigDecimal outstandingAmount,
         InvoiceStatus status
 ) {
-    public static InvoiceResponse from(Invoice i) {
+
+    public static InvoiceResponse from(Invoice invoice) {
+
+        BigDecimal outstandingAmount = invoice.getAmount()
+                .subtract(invoice.getPaidAmount());
+
         return new InvoiceResponse(
-                i.getId(), i.getInvoiceNumber(),
-                i.getVisit().getId(), i.getVisit().getVisitNumber(),
-                i.getPatient().getPatientNumber(),
-                i.getPatient().getFullName(),
-                i.getAmount(), i.getPaidAmount(), i.getStatus()
+                invoice.getId(),
+                invoice.getInvoiceNumber(),
+                invoice.getVisit().getId(),
+                invoice.getVisit().getVisitNumber(),
+                invoice.getPatient().getPatientNumber(),
+                invoice.getPatient().getFullName(),
+                invoice.getConsultationFee(),
+                invoice.getRegistrationFee(),
+                invoice.getAmount(),
+                invoice.getPaidAmount(),
+                outstandingAmount,
+                invoice.getStatus()
         );
     }
 }

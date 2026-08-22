@@ -22,4 +22,8 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
     boolean existsByVisitNumber(String visitNumber);
 
     Page<Visit> findByPatientId(Long patientId, Pageable pageable);
+    boolean existsByPatientIdAndIdLessThan(
+            Long patientId,
+            Long visitId
+    );
 }

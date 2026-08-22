@@ -34,6 +34,13 @@ public class Invoice {
     private Visit visit;
 
     @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal consultationFee;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal registrationFee = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
     @Column(nullable = false, precision = 10, scale = 2)

@@ -18,25 +18,51 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BillingService {
 
+    private static final BigDecimal FIRST_REGISTRATION_FEE =
+            new BigDecimal("1200.00");
+
     private final VisitRepository visitRepository;
     private final InvoiceRepository invoiceRepository;
     private final PaymentRepository paymentRepository;
 
     @Transactional
     public InvoiceResponse createConsultationInvoice(Long visitId) {
+
         Visit visit = visitRepository.findById(visitId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Visit not found: " + visitId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Visit not found: " + visitId));
 
         if (invoiceRepository.findByVisitId(visitId).isPresent()) {
             throw new BadRequestException("Invoice already exists for this visit");
         }
 
+        BigDecimal consultationFee = visit.getConsultationFee();
+
+        /*
+         * Registration fee is charged only when this is the patient's
+         * first-ever visit.
+         *
+         * The current visit already exists, so we check whether an
+         * older visit ID exists for the same patient.
+         */
+        boolean firstVisit = !visitRepository.existsByPatientIdAndIdLessThan(
+                visit.getPatient().getId(),
+                visit.getId()
+        );
+
+        BigDecimal registrationFee = firstVisit
+                ? FIRST_REGISTRATION_FEE
+                : BigDecimal.ZERO;
+
+        BigDecimal totalAmount = consultationFee.add(registrationFee);
+
         Invoice invoice = Invoice.builder()
                 .invoiceNumber(generateInvoiceNumber())
                 .patient(visit.getPatient())
                 .visit(visit)
-                .amount(visit.getConsultationFee())
+                .consultationFee(consultationFee)
+                .registrationFee(registrationFee)
+                .amount(totalAmount)
                 .paidAmount(BigDecimal.ZERO)
                 .status(InvoiceStatus.UNPAID)
                 .build();
@@ -46,15 +72,18 @@ public class BillingService {
 
     @Transactional
     public InvoiceResponse pay(PaymentRequest request) {
+
         Invoice invoice = invoiceRepository.findById(request.invoiceId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Invoice not found: " + request.invoiceId()));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Invoice not found: " + request.invoiceId()));
 
         if (invoice.getStatus() == InvoiceStatus.PAID) {
             throw new BadRequestException("Invoice is already fully paid");
         }
 
-        BigDecimal remaining = invoice.getAmount().subtract(invoice.getPaidAmount());
+        BigDecimal remaining = invoice.getAmount()
+                .subtract(invoice.getPaidAmount());
 
         if (request.amount().compareTo(remaining) > 0) {
             throw new BadRequestException(
@@ -72,12 +101,17 @@ public class BillingService {
 
         paymentRepository.save(payment);
 
-        invoice.setPaidAmount(invoice.getPaidAmount().add(request.amount()));
+        invoice.setPaidAmount(
+                invoice.getPaidAmount().add(request.amount())
+        );
 
         if (invoice.getPaidAmount().compareTo(invoice.getAmount()) == 0) {
+
             invoice.setStatus(InvoiceStatus.PAID);
             invoice.getVisit().setStatus(VisitStatus.PAID);
+
         } else {
+
             invoice.setStatus(InvoiceStatus.PARTIALLY_PAID);
         }
 
@@ -86,18 +120,28 @@ public class BillingService {
 
     @Transactional(readOnly = true)
     public InvoiceResponse getByVisit(Long visitId) {
-        return InvoiceResponse.from(invoiceRepository.findByVisitId(visitId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Invoice not found for visit: " + visitId)));
+
+        return InvoiceResponse.from(
+                invoiceRepository.findByVisitId(visitId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Invoice not found for visit: " + visitId))
+        );
     }
 
     private String generateInvoiceNumber() {
-        return "INV-" + UUID.randomUUID().toString()
-                .replace("-", "").substring(0, 12).toUpperCase();
+        return "INV-" + UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 12)
+                .toUpperCase();
     }
 
     private String generatePaymentNumber() {
-        return "PAY-" + UUID.randomUUID().toString()
-                .replace("-", "").substring(0, 12).toUpperCase();
+        return "PAY-" + UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 12)
+                .toUpperCase();
     }
 }
