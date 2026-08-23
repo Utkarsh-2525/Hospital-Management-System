@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -126,5 +127,36 @@ public class VisitService {
                             .replace("-", "").substring(0, 6).toUpperCase();
         } while (visitRepository.existsByVisitNumber(number));
         return number;
+    }
+
+    @Transactional(readOnly = true)
+    public List<QueueResponse> myDoctorQueue(
+            String username,
+            LocalDate date
+    ) {
+        Doctor doctor = doctorRepository.findByUserUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Doctor profile not found for logged-in user"
+                        ));
+
+        return doctorQueue(doctor.getId(), date);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VisitResponse> getDoctorVisits(String username) {
+
+        Doctor doctor = doctorRepository.findByUserUsername(username)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Doctor profile not found for logged-in user"
+                        )
+                );
+
+        return visitRepository
+                .findByDoctorIdOrderByVisitDateDescCreatedAtDesc(doctor.getId())
+                .stream()
+                .map(VisitResponse::from)
+                .toList();
     }
 }

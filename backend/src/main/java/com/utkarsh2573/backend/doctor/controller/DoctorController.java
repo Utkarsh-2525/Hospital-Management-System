@@ -49,4 +49,14 @@ public class DoctorController {
                 .map(DoctorResponse::from)
                 .toList();
     }
+
+//    @GetMapping("/visits")
+//    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
+//    public List<VisitResponse> getDoctorVisits(
+//            Authentication authentication
+//    ) {
+//        return visitService.getDoctorVisits(
+//                authentication.getName()
+//        );
+//    }
 }
