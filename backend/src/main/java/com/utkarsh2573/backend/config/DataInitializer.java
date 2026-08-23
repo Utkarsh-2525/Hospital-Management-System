@@ -16,8 +16,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.math.BigDecimal;
-
 @Configuration
 @RequiredArgsConstructor
 public class DataInitializer {
@@ -25,7 +23,6 @@ public class DataInitializer {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final DepartmentRepository departmentRepository;
-    private final DoctorRepository doctorRepository;
     private final MedicineRepository medicineRepository;
     private final LabTestRepository labTestRepository;
 
@@ -39,45 +36,71 @@ public class DataInitializer {
             createIfMissing("lab", "lab@hms.local", "Lab@123", Role.LAB_TECHNICIAN);
             createIfMissing("patient", "patient@hms.local", "Patient@123", Role.PATIENT);
 
-            Department medicine = departmentRepository.findByCode("MED")
-                    .orElseGet(() -> departmentRepository.save(
-                            Department.builder()
-                                    .name("General Medicine")
-                                    .code("MED")
-                                    .description("General outpatient consultation")
-                                    .active(true)
-                                    .build()
-                    ));
+            Department medicine = seedDepartment(
+                    "MED",
+                    "General Medicine",
+                    "General outpatient consultation"
+            );
 
-            if (!doctorRepository.existsByDoctorNumber("D-0001")) {
-                doctorRepository.save(
-                        Doctor.builder()
-                                .doctorNumber("D-0001")
-                                .user(doctorUser)
-                                .fullName("Dr. Demo")
-                                .qualification("MBBS")
-                                .specialization("General Medicine")
-                                .department(medicine)
-                                .consultationFee(new BigDecimal("500.00"))
-                                .active(true)
-                                .build()
-                );
-            }
+            Department cardiology = seedDepartment(
+                    "CARD",
+                    "Cardiology",
+                    "Diagnosis and treatment of heart and cardiovascular conditions"
+            );
 
-//            if (!doctorRepository.existsByDoctorNumber("D-0002")) {
-//                doctorRepository.save(
-//                        Doctor.builder()
-//                                .doctorNumber("D-0002")
-//                                .user(doctorUser)
-//                                .fullName("Dr. Vansh")
-//                                .qualification("MBBS, MS, MD, DNB")
-//                                .specialization("Gynaecology")
-//                                .department(medicine)
-//                                .consultationFee(new BigDecimal("1500.00"))
-//                                .active(true)
-//                                .build()
-//                );
-//            }
+            Department orthopedics = seedDepartment(
+                    "ORTH",
+                    "Orthopedics",
+                    "Bones, joints, muscles and musculoskeletal conditions"
+            );
+
+            Department dermatology = seedDepartment(
+                    "DERM",
+                    "Dermatology",
+                    "Diagnosis and treatment of skin, hair and nail conditions"
+            );
+
+            Department pediatrics = seedDepartment(
+                    "PED",
+                    "Pediatrics",
+                    "Medical care for infants, children and adolescents"
+            );
+
+            Department gynecology = seedDepartment(
+                    "GYN",
+                    "Gynaecology",
+                    "Women's reproductive and gynecological healthcare"
+            );
+
+            Department ent = seedDepartment(
+                    "ENT",
+                    "ENT",
+                    "Ear, nose and throat healthcare"
+            );
+
+            Department neurology = seedDepartment(
+                    "NEURO",
+                    "Neurology",
+                    "Diagnosis and treatment of neurological conditions"
+            );
+
+            Department ophthalmology = seedDepartment(
+                    "OPHTH",
+                    "Ophthalmology",
+                    "Eye and vision healthcare"
+            );
+
+            Department surgery = seedDepartment(
+                    "SURG",
+                    "General Surgery",
+                    "Surgical diagnosis and treatment"
+            );
+
+            Department oncology = seedDepartment(
+                    "ONCO",
+                    "Oncology",
+                    "Diagnosis and treatment of cancer and related conditions"
+            );
 
             seedMedicine("MED-001", "Paracetamol 650 mg", "Paracetamol", "Tablet", "650 mg");
             seedMedicine("MED-002", "Cetirizine 10 mg", "Cetirizine", "Tablet", "10 mg");
@@ -146,5 +169,20 @@ public class DataInitializer {
                             .build()
             );
         }
+    }
+    private Department seedDepartment(
+            String code,
+            String name,
+            String description
+    ) {
+        return departmentRepository.findByCode(code)
+                .orElseGet(() -> departmentRepository.save(
+                        Department.builder()
+                                .name(name)
+                                .code(code)
+                                .description(description)
+                                .active(true)
+                                .build()
+                ));
     }
 }

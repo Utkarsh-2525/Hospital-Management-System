@@ -74,6 +74,7 @@ public class DoctorService {
                 .doctorNumber(generateDoctorNumber())
                 .user(user)
                 .fullName(request.fullName())
+                .qualification(request.qualification())
                 .specialization(request.specialization())
                 .department(department)
                 .consultationFee(request.consultationFee())

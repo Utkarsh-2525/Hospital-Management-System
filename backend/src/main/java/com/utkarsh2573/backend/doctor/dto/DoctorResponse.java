@@ -14,12 +14,16 @@ public record DoctorResponse(
         String departmentName,
         BigDecimal consultationFee
 ) {
-    public static DoctorResponse from(Doctor d) {
+    public static DoctorResponse from(Doctor doctor) {
         return new DoctorResponse(
-                d.getId(), d.getDoctorNumber(), d.getFullName(),
-                d.getQualification(), d.getSpecialization(),
-                d.getDepartment().getId(), d.getDepartment().getName(),
-                d.getConsultationFee()
+                doctor.getId(),
+                doctor.getDoctorNumber(),
+                doctor.getFullName(),
+                doctor.getQualification(),
+                doctor.getSpecialization(),
+                doctor.getDepartment().getId(),
+                doctor.getDepartment().getName(),
+                doctor.getConsultationFee()
         );
     }
 }

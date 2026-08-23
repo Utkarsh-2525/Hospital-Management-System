@@ -11,17 +11,21 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
     Optional<Doctor> findByDoctorNumber(String doctorNumber);
 
-    List<Doctor> findByDepartmentIdAndActiveTrue(Long departmentId);
-
     boolean existsByDoctorNumber(String doctorNumber);
 
+    @EntityGraph(attributePaths = {"department"})
+    List<Doctor> findByDepartmentIdAndActiveTrue(Long departmentId);
+
+    @EntityGraph(attributePaths = {"department"})
     @Query("""
-        select d from Doctor d
-        where d.active = true
-        and (
-            lower(d.fullName) like lower(concat('%', :search, '%'))
-            or lower(d.specialization) like lower(concat('%', :search, '%'))
-        )
-    """)
-    List<Doctor> searchActiveDoctors(@Param("search") String search);
+            SELECT d
+            FROM Doctor d
+            WHERE d.active = true
+            AND (
+                LOWER(d.fullName) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(d.specialization) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(d.doctorNumber) LIKE LOWER(CONCAT('%', :query, '%'))
+            )
+            """)
+    List<Doctor> searchActiveDoctors(@Param("query") String query);
 }
