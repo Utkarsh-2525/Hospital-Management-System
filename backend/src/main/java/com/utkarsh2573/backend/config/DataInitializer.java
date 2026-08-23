@@ -64,7 +64,22 @@ public class DataInitializer {
                 );
             }
 
-            seedMedicine("MED-001", "Paracetamol 500 mg", "Paracetamol", "Tablet", "500 mg");
+//            if (!doctorRepository.existsByDoctorNumber("D-0002")) {
+//                doctorRepository.save(
+//                        Doctor.builder()
+//                                .doctorNumber("D-0002")
+//                                .user(doctorUser)
+//                                .fullName("Dr. Vansh")
+//                                .qualification("MBBS, MS, MD, DNB")
+//                                .specialization("Gynaecology")
+//                                .department(medicine)
+//                                .consultationFee(new BigDecimal("1500.00"))
+//                                .active(true)
+//                                .build()
+//                );
+//            }
+
+            seedMedicine("MED-001", "Paracetamol 650 mg", "Paracetamol", "Tablet", "650 mg");
             seedMedicine("MED-002", "Cetirizine 10 mg", "Cetirizine", "Tablet", "10 mg");
             seedMedicine("MED-003", "Omeprazole 20 mg", "Omeprazole", "Capsule", "20 mg");
 
