@@ -15,23 +15,25 @@ public class LabResultController {
 
     private final LabResultService labResultService;
 
-    @PostMapping("/order/{orderId}")
+    @PostMapping("/items/{orderItemId}")
     @PreAuthorize("hasRole('LAB_TECHNICIAN')")
     public LabResultResponse create(
-            @PathVariable Long orderId,
+            @PathVariable Long orderItemId,
             @Valid @RequestBody CreateLabResultRequest request
     ) {
         return labResultService.create(
-                orderId,
+                orderItemId,
                 request
         );
     }
 
-    @GetMapping("/order/{orderId}")
-    @PreAuthorize("hasAnyRole('LAB_TECHNICIAN','DOCTOR','ADMIN')")
-    public LabResultResponse getByOrderId(
-            @PathVariable Long orderId
+    @GetMapping("/items/{orderItemId}")
+    @PreAuthorize("hasAnyRole('LAB_TECHNICIAN','ADMIN','DOCTOR','PATIENT')")
+    public LabResultResponse get(
+            @PathVariable Long orderItemId
     ) {
-        return labResultService.getByOrderId(orderId);
+        return labResultService.getByOrderItemId(
+                orderItemId
+        );
     }
 }

@@ -158,7 +158,7 @@ public class PatientPortalService {
         }
 
         return labResultRepository
-                .findByLabOrderId(orderId)
+                .findByLabOrderItemId(orderId)
                 .map(LabResultResponse::from)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(

@@ -10,6 +10,8 @@ public record LabResultResponse(
         Long labOrderId,
         String orderNumber,
 
+        Long labTestId,
+        String testCode,
         String testName,
 
         String result,
@@ -21,15 +23,17 @@ public record LabResultResponse(
 
     public static LabResultResponse from(LabResult labResult) {
 
+        var item = labResult.getLabOrderItem();
+
         return new LabResultResponse(
                 labResult.getId(),
 
-                labResult.getLabOrder().getId(),
-                labResult.getLabOrder().getOrderNumber(),
+                item.getLabOrder().getId(),
+                item.getLabOrder().getOrderNumber(),
 
-                labResult.getLabOrder()
-                        .getLabTest()
-                        .getName(),
+                item.getLabTest().getId(),
+                item.getLabTest().getTestCode(),
+                item.getLabTest().getName(),
 
                 labResult.getResult(),
                 labResult.getRemarks(),

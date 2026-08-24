@@ -4,9 +4,9 @@ import com.utkarsh2573.backend.exception.BadRequestException;
 import com.utkarsh2573.backend.exception.ResourceNotFoundException;
 import com.utkarsh2573.backend.laboratory.dto.CreateLabResultRequest;
 import com.utkarsh2573.backend.laboratory.dto.LabResultResponse;
-import com.utkarsh2573.backend.laboratory.entity.LabOrder;
+import com.utkarsh2573.backend.laboratory.entity.LabOrderItem;
 import com.utkarsh2573.backend.laboratory.entity.LabResult;
-import com.utkarsh2573.backend.laboratory.repository.LabOrderRepository;
+import com.utkarsh2573.backend.laboratory.repository.LabOrderItemRepository;
 import com.utkarsh2573.backend.laboratory.repository.LabResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,30 +18,34 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class LabResultService {
 
-    private final LabOrderRepository labOrderRepository;
+    private final LabOrderItemRepository labOrderItemRepository;
     private final LabResultRepository labResultRepository;
 
     @Transactional
     public LabResultResponse create(
-            Long orderId,
+            Long orderItemId,
             CreateLabResultRequest request
     ) {
 
-        LabOrder order = labOrderRepository.findById(orderId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Lab order not found: " + orderId
-                        )
-                );
+        LabOrderItem orderItem =
+                labOrderItemRepository.findById(orderItemId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Lab order item not found: "
+                                                + orderItemId
+                                )
+                        );
 
-        if (labResultRepository.findByLabOrderId(orderId).isPresent()) {
+        if (labResultRepository
+                .existsByLabOrderItemId(orderItemId)) {
+
             throw new BadRequestException(
-                    "Lab result already exists for this order"
+                    "Lab result already exists for this test"
             );
         }
 
         LabResult result = LabResult.builder()
-                .labOrder(order)
+                .labOrderItem(orderItem)
                 .result(request.result())
                 .remarks(request.remarks())
                 .attachmentUrl(request.attachmentUrl())
@@ -54,16 +58,19 @@ public class LabResultService {
     }
 
     @Transactional(readOnly = true)
-    public LabResultResponse getByOrderId(Long orderId) {
+    public LabResultResponse getByOrderItemId(
+            Long orderItemId
+    ) {
 
-        LabResult result = labResultRepository
-                .findByLabOrderId(orderId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Lab result not found for order: "
-                                        + orderId
-                        )
-                );
+        LabResult result =
+                labResultRepository
+                        .findByLabOrderItemId(orderItemId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Lab result not found for order item: "
+                                                + orderItemId
+                                )
+                        );
 
         return LabResultResponse.from(result);
     }

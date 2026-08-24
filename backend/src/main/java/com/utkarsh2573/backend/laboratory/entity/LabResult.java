@@ -19,8 +19,12 @@ public class LabResult {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "lab_order_id", nullable = false, unique = true)
-    private LabOrder labOrder;
+    @JoinColumn(
+            name = "lab_order_item_id",
+            nullable = false,
+            unique = true
+    )
+    private LabOrderItem labOrderItem;
 
     @Column(nullable = false, length = 5000)
     private String result;

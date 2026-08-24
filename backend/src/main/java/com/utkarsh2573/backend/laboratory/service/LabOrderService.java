@@ -8,6 +8,7 @@ import com.utkarsh2573.backend.exception.ResourceNotFoundException;
 import com.utkarsh2573.backend.laboratory.dto.CreateLabOrderRequest;
 import com.utkarsh2573.backend.laboratory.dto.LabOrderResponse;
 import com.utkarsh2573.backend.laboratory.entity.LabOrder;
+import com.utkarsh2573.backend.laboratory.entity.LabOrderItem;
 import com.utkarsh2573.backend.laboratory.entity.LabTest;
 import com.utkarsh2573.backend.laboratory.repository.LabOrderRepository;
 import com.utkarsh2573.backend.laboratory.repository.LabTestRepository;
@@ -43,24 +44,14 @@ public class LabOrderService {
                 );
 
         Consultation consultation =
-                consultationRepository.findById(
-                        request.consultationId()
-                ).orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Consultation not found: "
-                                        + request.consultationId()
-                        )
-                );
+                consultationRepository.findById(request.consultationId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Consultation not found: "
+                                                + request.consultationId()
+                                )
+                        );
 
-        LabTest labTest = labTestRepository.findById(
-                request.labTestId()
-        ).orElseThrow(() ->
-                new ResourceNotFoundException(
-                        "Lab test not found: " + request.labTestId()
-                )
-        );
-
-// Consultation → Visit → Patient
         if (!consultation.getVisit()
                 .getPatient()
                 .getId()
@@ -71,15 +62,39 @@ public class LabOrderService {
             );
         }
 
-        String orderNumber = generateOrderNumber();
+        List<LabTest> labTests = labTestRepository
+                .findAllById(request.labTestIds());
+
+        if (labTests.size() != request.labTestIds().size()) {
+            throw new ResourceNotFoundException(
+                    "One or more lab tests not found"
+            );
+        }
+
+        for (LabTest labTest : labTests) {
+
+            if (!labTest.isActive()) {
+                throw new BadRequestException(
+                        "Lab test is inactive: " + labTest.getTestCode()
+                );
+            }
+        }
 
         LabOrder order = LabOrder.builder()
-                .orderNumber(orderNumber)
+                .orderNumber(generateOrderNumber())
                 .patient(patient)
                 .consultation(consultation)
-                .labTest(labTest)
                 .instructions(request.instructions())
                 .build();
+
+        for (LabTest labTest : labTests) {
+
+            LabOrderItem item = LabOrderItem.builder()
+                    .labTest(labTest)
+                    .build();
+
+            order.addItem(item);
+        }
 
         return LabOrderResponse.from(
                 labOrderRepository.save(order)

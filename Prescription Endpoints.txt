@@ -1,0 +1,18 @@
+Method	Endpoint					Purpose
+
+POST	/api/v1/doctor/prescriptions/{consultationId}	Create prescription
+
+
+
+
+GET	/api/v1/doctor/prescriptions/{consultationId}	View prescription
+
+
+
+
+PUT	/api/v1/doctor/prescriptions/{id}		Update prescription
+
+
+
+
+GET	/api/v1/patient-portal/prescriptions		Patient can view medicines

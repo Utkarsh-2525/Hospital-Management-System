@@ -1,0 +1,4 @@
+METHOD		ENDPOINT					DESC.
+PATCH 		/api/v1/laboratory/orders/1/sample		Lab Test Sample Collection
+PATCH 		/api/v1/laboratory/orders/1/processing		Lab Test Sample Processing
+PATCH 		/api/v1/laboratory/orders/1/complete		Lab Test Completed

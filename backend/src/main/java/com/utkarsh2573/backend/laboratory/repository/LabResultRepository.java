@@ -8,5 +8,7 @@ import java.util.Optional;
 public interface LabResultRepository
         extends JpaRepository<LabResult, Long> {
 
-    Optional<LabResult> findByLabOrderId(Long labOrderId);
+    Optional<LabResult> findByLabOrderItemId(Long labOrderItemId);
+
+    boolean existsByLabOrderItemId(Long labOrderItemId);
 }

@@ -113,6 +113,22 @@ public class SecurityConfig {
                                 "RECEPTIONIST",
                                 "PATIENT"
                         )
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/prescriptions"
+                        )
+                        .hasAnyRole("ADMIN", "DOCTOR")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/prescriptions/consultation/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "DOCTOR",
+                                "PATIENT",
+                                "PHARMACIST"
+                        )
 
                         // Everything else
                         .anyRequest().authenticated()

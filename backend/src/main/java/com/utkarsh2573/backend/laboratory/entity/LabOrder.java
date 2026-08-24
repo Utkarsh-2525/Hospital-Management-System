@@ -2,11 +2,12 @@ package com.utkarsh2573.backend.laboratory.entity;
 
 import com.utkarsh2573.backend.common.enums.LabOrderStatus;
 import com.utkarsh2573.backend.patient.entity.Patient;
-import com.utkarsh2573.backend.prescription.entity.Prescription;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "lab_orders")
@@ -32,9 +33,13 @@ public class LabOrder {
     @JoinColumn(name = "consultation_id", nullable = false)
     private com.utkarsh2573.backend.consultation.entity.Consultation consultation;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "lab_test_id", nullable = false)
-    private LabTest labTest;
+    @OneToMany(
+            mappedBy = "labOrder",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private List<LabOrderItem> items = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -51,5 +56,10 @@ public class LabOrder {
     @PrePersist
     void onCreate() {
         orderedAt = LocalDateTime.now();
+    }
+
+    public void addItem(LabOrderItem item) {
+        items.add(item);
+        item.setLabOrder(this);
     }
 }

@@ -3,6 +3,7 @@ package com.utkarsh2573.backend.laboratory.dto;
 import com.utkarsh2573.backend.laboratory.entity.LabOrder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record LabOrderResponse(
         Long id,
@@ -13,10 +14,8 @@ public record LabOrderResponse(
         String patientName,
 
         Long consultationId,
-        Long labTestId,
-        String testCode,
-        String testName,
-        String sampleType,
+
+        List<LabOrderTestResponse> tests,
 
         String status,
         String instructions,
@@ -38,10 +37,10 @@ public record LabOrderResponse(
 
                 order.getConsultation().getId(),
 
-                order.getLabTest().getId(),
-                order.getLabTest().getTestCode(),
-                order.getLabTest().getName(),
-                order.getLabTest().getSampleType(),
+                order.getItems()
+                        .stream()
+                        .map(LabOrderTestResponse::from)
+                        .toList(),
 
                 order.getStatus().name(),
                 order.getInstructions(),
